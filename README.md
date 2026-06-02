@@ -123,3 +123,16 @@ Metrics:
 - Better OCR Post-processing
 - Human Review Workflow
 
+## Evaluation Results
+
+Sample Run:
+
+Precision: 0.36
+Recall: 0.92
+F1 Score: 0.52
+
+Limitations:
+- OCR noise affects medication extraction.
+- Ground truth was manually created from source notes.
+- Future improvements include confidence scoring and OCR normalization.
+
