@@ -1,0 +1,9 @@
+langgraph
+langchain
+langchain-openai
+openai
+pydantic
+pymupdf
+python-dotenv
+tenacity
+google-generativeai

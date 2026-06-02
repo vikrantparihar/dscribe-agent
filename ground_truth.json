@@ -1,0 +1,28 @@
+{
+  "patient_demographics": {
+    "full_name": "MISSING",
+    "age": "MISSING",
+    "gender": "female",
+    "mrn": "MISSING",
+    "ip_no": "MISSING"
+  },
+  "admission_date": "MISSING",
+  "discharge_date": "MISSING",
+  "diagnoses": [
+    "ACUTE GASTROENTERITIS WITH DEHYDRATION",
+    "URINARY TRACT INFECTION"
+  ],
+  "allergies": "MISSING",
+  "medications": {},
+  "procedures": [
+    "USG abdomen and pelvis"
+  ],
+  "pending_results": [
+    "Urine culture and sensitivity report"
+  ],
+  "follow_up": [
+    "Review immediately in case of fever, loose stools, vomiting, fatigue.",
+    "Review on 09.03.2026. CBC"
+  ],
+  "discharge_condition": "Hemodynamically stable"
+}

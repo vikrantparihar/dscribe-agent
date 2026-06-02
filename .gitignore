@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+.env
+*.pyc
+gemini_raw.txt
+outputs/
