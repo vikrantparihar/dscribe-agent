@@ -4,3 +4,18 @@ __pycache__/
 *.pyc
 gemini_raw.txt
 outputs/
+
+# Local medical source documents and generated OCR review files
+patients/*.pdf
+ocr_full.txt
+ocr_review.txt
+review_pages/
+
+# Local backups and macOS files
+.DS_Store
+*.bak
+*.backup-*
+*.before-*
+
+# Python generated files
+*.py[cod]

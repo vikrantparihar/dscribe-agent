@@ -1,7 +1,7 @@
 import json
-import re
 
 import google.generativeai as genai
+from pydantic import ValidationError
 
 from config import GEMINI_API_KEY
 from schemas.medical_schema import MedicalRecord
@@ -61,57 +61,49 @@ Source Notes:
     try:
         response = model.generate_content(
             prompt,
-            generation_config={
-                "response_mime_type": "application/json"
+            generation_config={"response_mime_type": "application/json"},
+        )
+
+        raw_output = getattr(response, "text", None)
+
+        if not isinstance(raw_output, str) or not raw_output.strip():
+            return {
+                "error": "Empty Response",
+                "details": "Gemini returned no text to parse.",
             }
-        )
 
-        raw_output = response.text.strip()
+        raw_output = raw_output.strip()
 
-        # Save raw output for debugging
-        with open("gemini_raw.txt", "w", encoding="utf-8") as f:
-            f.write(raw_output)
+        # Accept JSON enclosed in Markdown code fences.
+        if raw_output.startswith("```"):
+            lines = raw_output.splitlines()
+            if lines and lines[0].strip().lower() in ("```json", "```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            raw_output = "\n".join(lines).strip()
 
-        # Remove markdown fences if present
-        raw_output = (
-            raw_output
-            .replace("```json", "")
-            .replace("```", "")
-            .strip()
-        )
+        try:
+            data = json.loads(raw_output)
+        except json.JSONDecodeError as e:
+            return {
+                "error": "Invalid JSON",
+                "details": str(e),
+            }
 
-        # Extract JSON safely
-        match = re.search(r"\{.*\}", raw_output, re.DOTALL)
+        try:
+            validated_data = MedicalRecord.model_validate(data)
+        except ValidationError as e:
+            return {
+                "error": "Schema Validation Failed",
+                "details": str(e),
+            }
 
-        if not match:
-            raise ValueError("No valid JSON found in Gemini response")
-
-        clean_json = match.group(0)
-
-        # Parse JSON
-        data = json.loads(clean_json)
-
-        # Validate schema
-        validated_data = MedicalRecord.model_validate(data)
-
-        print("✅ Schema Validation Passed")
-
+        print("Schema validation passed")
         return validated_data.model_dump()
 
-    except json.JSONDecodeError as e:
-        print("❌ Invalid JSON returned by Gemini")
-        print(e)
-
-        return {
-            "error": "Invalid JSON",
-            "details": str(e)
-        }
-
     except Exception as e:
-        print("❌ Validation Failed")
-        print(e)
-
         return {
-            "error": "Validation Failed",
-            "details": str(e)
+            "error": "Generation Failed",
+            "details": str(e),
         }

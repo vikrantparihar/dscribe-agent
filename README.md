@@ -125,14 +125,44 @@ Metrics:
 
 ## Evaluation Results
 
-Sample Run:
+Latest local evaluation run:
 
-Precision: 0.36
-Recall: 0.92
-F1 Score: 0.52
+### Field-Level Exact Match
 
-Limitations:
-- OCR noise affects medication extraction.
+- Correct fields: 4
+- Scored predictions: 6
+- Evaluable ground-truth fields: 6
+- Additional unscored predictions: 11
+- Precision: 0.6667
+- Recall: 0.6667
+- F1 Score: 0.6667
+
+### List-Item Exact Match
+
+- Correct items: 4
+- Predicted items: 6
+- Ground-truth items: 6
+- Precision: 0.6667
+- Recall: 0.6667
+- F1 Score: 0.6667
+
+### Text Similarity Diagnostics
+
+- Mean best-match character similarity: 96.21%
+
+Character similarity is a diagnostic measure only; it does not establish
+clinical correctness. These results describe the current sample and are not
+evidence of a generalizable model accuracy.
+
+### Limitations
+
+- OCR noise can affect clinical information, especially medication extraction.
 - Ground truth was manually created from source notes.
-- Future improvements include confidence scoring and OCR normalization.
+- Only fields with available ground-truth values are scored by the field-level
+  metric; additional predictions are reported separately as unscored.
+- List-item metrics use exact normalized text matching.
+- Evaluation on additional manually verified records is needed before drawing
+  broader conclusions about extraction performance.
+- Future improvements include confidence scoring, OCR normalization, and human
+  review.
 
