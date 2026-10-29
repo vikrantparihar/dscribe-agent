@@ -1,19 +1,14 @@
 import json
+from pathlib import Path
 
-with open("ground_truth.json") as f:
-    gt = json.load(f)
-
-with open("outputs/structured_output.json") as f:
-    pred = json.load(f)
 
 def flatten(obj, prefix=""):
     items = {}
 
     if isinstance(obj, dict):
-        for k, v in obj.items():
-            items.update(
-                flatten(v, f"{prefix}.{k}" if prefix else k)
-            )
+        for key, value in obj.items():
+            path = f"{prefix}.{key}" if prefix else key
+            items.update(flatten(value, path))
 
     elif isinstance(obj, list):
         items[prefix] = set(map(str, obj))
@@ -23,27 +18,58 @@ def flatten(obj, prefix=""):
 
     return items
 
-gt_flat = flatten(gt)
-pred_flat = flatten(pred)
 
-correct = 0
-total_pred = len(pred_flat)
-total_gt = len(gt_flat)
+def calculate_metrics(gt, pred):
+    gt_flat = flatten(gt)
+    pred_flat = flatten(pred)
 
-for key in gt_flat:
-    if key in pred_flat and pred_flat[key] == gt_flat[key]:
-        correct += 1
+    correct = sum(
+        1
+        for key, value in gt_flat.items()
+        if key in pred_flat and pred_flat[key] == value
+    )
 
-precision = correct / total_pred
-recall = correct / total_gt
+    total_pred = len(pred_flat)
+    total_gt = len(gt_flat)
 
-if precision + recall == 0:
-    f1 = 0
-else:
-    f1 = 2 * precision * recall / (precision + recall)
+    precision = correct / total_pred if total_pred else 0.0
+    recall = correct / total_gt if total_gt else 0.0
 
-print("\n===== EVALUATION =====")
-print(f"Correct Fields : {correct}")
-print(f"Precision      : {precision:.2f}")
-print(f"Recall         : {recall:.2f}")
-print(f"F1 Score       : {f1:.2f}")
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if precision + recall
+        else 0.0
+    )
+
+    return {
+        "correct_fields": correct,
+        "total_pred": total_pred,
+        "total_gt": total_gt,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+    }
+
+
+def main():
+    base_dir = Path(__file__).resolve().parent.parent
+
+    with (base_dir / "ground_truth.json").open(encoding="utf-8") as file:
+        ground_truth = json.load(file)
+
+    with (base_dir / "outputs/structured_output.json").open(
+        encoding="utf-8"
+    ) as file:
+        prediction = json.load(file)
+
+    metrics = calculate_metrics(ground_truth, prediction)
+
+    print("\n===== EVALUATION =====")
+    print(f"Correct Fields : {metrics['correct_fields']}")
+    print(f"Precision      : {metrics['precision']:.2f}")
+    print(f"Recall         : {metrics['recall']:.2f}")
+    print(f"F1 Score       : {metrics['f1']:.2f}")
+
+
+if __name__ == "__main__":
+    main()
